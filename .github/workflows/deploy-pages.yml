@@ -1,0 +1,53 @@
+name: Deploy to GitHub Pages
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+# Allow only one concurrent deployment
+concurrency:
+  group: pages
+  cancel-in-progress: true
+
+jobs:
+  deploy:
+    environment:
+      name: github-pages
+      url: ${{ steps.deploy.outputs.page_url }}
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Inject Worker URL
+        # If the WORKER_URL repository variable is set, replace the placeholder
+        # in index.html so the page calls the proxy instead of requiring a user API key.
+        # If WORKER_URL is not set the placeholder stays and the page falls back to
+        # direct mode (user must supply their own key).
+        env:
+          WORKER_URL: ${{ vars.WORKER_URL }}
+        run: |
+          if [ -n "$WORKER_URL" ]; then
+            sed -i "s|%%WORKER_URL%%|${WORKER_URL}|g" index.html
+            echo "Worker URL injected: ${WORKER_URL}"
+          else
+            echo "WORKER_URL not set — page will use direct OpenAI mode (user-provided key)."
+          fi
+
+      - name: Configure Pages
+        uses: actions/configure-pages@v5
+
+      - name: Upload artifact
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: .
+
+      - name: Deploy to GitHub Pages
+        id: deploy
+        uses: actions/deploy-pages@v4
