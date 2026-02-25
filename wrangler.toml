@@ -1,0 +1,12 @@
+name = "maslow-assistant"
+main = "worker.js"
+compatibility_date = "2024-11-01"
+
+# Secrets (set via `npx wrangler secret put OPENAI_API_KEY`):
+#   OPENAI_API_KEY  — your OpenAI API key
+#
+# Optional environment variables (set in the Cloudflare dashboard or wrangler.toml):
+#   ALLOWED_ORIGIN  — restrict CORS to your GitHub Pages domain, e.g. https://maslowcnc.github.io
+
+[vars]
+# ALLOWED_ORIGIN = "https://maslowcnc.github.io"
